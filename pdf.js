@@ -57,7 +57,7 @@ nb(84);H("Evidencia fotográfica");
 var px=M;
 x.P.forEach(function(p){var s=Math.min(56/p.w,70/p.h),w=p.w*s,h=p.h*s;d.addImage(p.d,"JPEG",px,y,w,h);px+=60});
 y+=74}
-nb(34);y+=16;
+nb(44);if(x.sig){d.addImage(x.sig,"JPEG",M+8,y+1,60,20);y+=21}else y+=16;
 d.setDrawColor(60,60,60);d.setLineWidth(.3);
 d.line(M,y,M+80,y);d.line(W-M-80,y,W-M,y);
 d.setFont("helvetica","bold");d.setFontSize(9);d.setTextColor(30,30,30);

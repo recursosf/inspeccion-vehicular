@@ -73,6 +73,11 @@ pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg);border:1px solid v
 
 <div class="res pend" id="res">Complete la lista para ver el resultado</div>
 
+<div class="card"><h2>Firma del conductor</h2>
+<canvas id="sig" width="600" height="200" style="width:100%;height:auto;aspect-ratio:3/1;border:1px dashed var(--bd);border-radius:8px;background:#fff;touch-action:none;display:block"></canvas>
+<p class="sub" style="margin:6px 0">Firme con el dedo dentro del recuadro.</p>
+<div class="acts"><button class="sec" id="sigclr" style="grid-column:1/-1">Borrar firma</button></div></div>
+
 <div class="card"><h2>Enviar inspección</h2>
 <div class="acts"><button id="pdfsend" style="grid-column:1/-1">Enviar PDF por WhatsApp</button><button class="sec" id="pdfdl" style="grid-column:1/-1">Solo descargar PDF</button></div>
 <p class="sub" style="margin-top:8px">Se genera un PDF con la inspección, las fotos y espacio para firmas. Toque el primer botón, elija WhatsApp y luego el grupo.</p><p class="msg" id="msg"></p></div>
@@ -127,10 +132,18 @@ var P=[];
 $("foto").addEventListener("change",function(e){var fl=e.target.files[0];e.target.value="";if(!fl||P.length>=3)return;shrink(fl,function(o){if(o){P.push(o);pv()}})});
 function shrink(fl,cb){var im=new Image(),u=URL.createObjectURL(fl);im.onload=function(){var s=Math.min(1,1280/Math.max(im.width,im.height)),w=Math.round(im.width*s),h=Math.round(im.height*s),c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(u);cb({d:c.toDataURL("image/jpeg",.7),w:w,h:h})};im.onerror=function(){cb(null)};im.src=u}
 function pv(){$("ph").innerHTML="";P.forEach(function(p,i){var m=document.createElement("img");m.src=p.d;m.onclick=function(){P.splice(i,1);pv()};$("ph").appendChild(m)});$("fn").textContent=P.length?P.length+" foto(s). Toque una para quitarla.":"Hasta 3 fotos, que van dentro del PDF. Repita para agregar otra."}
+var sg=$("sig"),sx=sg.getContext("2d"),dr=0,hs=0;
+function sclr(){sx.fillStyle="#fff";sx.fillRect(0,0,600,200);sx.lineWidth=3;sx.lineCap="round";sx.lineJoin="round";sx.strokeStyle="#111";hs=0}
+sclr();
+function pt(e){var r=sg.getBoundingClientRect();return[(e.clientX-r.left)*600/r.width,(e.clientY-r.top)*200/r.height]}
+sg.addEventListener("pointerdown",function(e){e.preventDefault();dr=1;var p=pt(e);sx.beginPath();sx.moveTo(p[0],p[1]);sx.lineTo(p[0]+.1,p[1]+.1);sx.stroke();sx.beginPath();sx.moveTo(p[0],p[1]);hs=1;try{sg.setPointerCapture(e.pointerId)}catch(x){}});
+sg.addEventListener("pointermove",function(e){if(!dr)return;e.preventDefault();var p=pt(e);sx.lineTo(p[0],p[1]);sx.stroke();sx.beginPath();sx.moveTo(p[0],p[1])});
+["pointerup","pointercancel"].forEach(function(n){sg.addEventListener(n,function(){dr=0})});
+$("sigclr").onclick=sclr;
 var ENTIDAD="IPS Municipal de Ipiales E.S.E.";
-function ok(){var c=calc();if(!$("placa").value.trim()||!$("cond").value.trim()){say("Escriba la placa y el nombre del conductor");return 0}if(c.d<c.t){say("Faltan "+(c.t-c.d)+" ítems por marcar");return 0}if(!window.jspdf||!window.buildPDF){say("No cargó el generador de PDF. Abra la app con internet y vuelva a intentar");return 0}return 1}
+function ok(){var c=calc();if(!$("placa").value.trim()||!$("cond").value.trim()){say("Escriba la placa y el nombre del conductor");return 0}if(c.d<c.t){say("Faltan "+(c.t-c.d)+" ítems por marcar");return 0}if(!hs){say("Falta la firma del conductor");return 0}if(!window.jspdf||!window.buildPDF){say("No cargó el generador de PDF. Abra la app con internet y vuelva a intentar");return 0}return 1}
 function mk(){var c=calc(),fe=$("fecha").value,pl=$("placa").value.trim().toUpperCase();
-var doc=buildPDF({J:window.jspdf.jsPDF,G:G,S:S,c:c,P:P,entidad:ENTIDAD,f:{fecha:fe,placa:pl,cond:$("cond").value.trim(),tipo:$("tipo").value,km:$("km").value,ruta:$("ruta").value.trim(),obs:$("obs").value.trim()}});
+var doc=buildPDF({J:window.jspdf.jsPDF,G:G,S:S,c:c,P:P,sig:sg.toDataURL("image/jpeg",.85),entidad:ENTIDAD,f:{fecha:fe,placa:pl,cond:$("cond").value.trim(),tipo:$("tipo").value,km:$("km").value,ruta:$("ruta").value.trim(),obs:$("obs").value.trim()}});
 var nm="Inspeccion_"+(pl.replace(/[^A-Z0-9]/g,"")||"vehiculo")+"_"+fe.slice(0,10).replace(/-/g,"")+".pdf";
 var est=c.crit.length?"NO APTO PARA SALIR":(c.mal.length?"APTO CON NOVEDADES":"APTO");
 return{c:c,doc:doc,nm:nm,est:est,pl:pl,f:new File([doc.output("blob")],nm,{type:"application/pdf"})}}
