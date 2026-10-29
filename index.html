@@ -69,21 +69,18 @@ pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg);border:1px solid v
 <div class="card"><h2>Observaciones</h2>
 <textarea id="obs" rows="3" placeholder="Novedades, daños, fugas, ruidos..."></textarea></div>
 
-<div class="card"><h2>Foto de la falla (opcional)</h2><input id="foto" type="file" accept="image/*" capture="environment"><div class="ph" id="ph"></div><p class="sub" id="fn">Hasta 3 fotos. Repita para agregar otra.</p></div>
+<div class="card"><h2>Foto de la falla (opcional)</h2><input id="foto" type="file" accept="image/*" capture="environment"><div class="ph" id="ph"></div><p class="sub" id="fn">Hasta 3 fotos, que van dentro del PDF. Repita para agregar otra.</p></div>
 
 <div class="res pend" id="res">Complete la lista para ver el resultado</div>
 
-<div class="card"><h2>Reporte</h2><pre id="rep"></pre>
-<div class="acts">
-<button id="copy">Copiar</button>
-<a id="wa" target="_blank" rel="noopener">Enviar a WhatsApp</a>
-<a id="tg" class="sec" target="_blank" rel="noopener">Telegram</a>
-<button class="sec" id="save">Guardar en este equipo</button>
-</div>
-<p class="msg" id="msg"></p></div>
+<div class="card"><h2>Enviar inspección</h2>
+<div class="acts"><button id="pdfsend" style="grid-column:1/-1">Enviar PDF por WhatsApp</button><button class="sec" id="pdfdl" style="grid-column:1/-1">Solo descargar PDF</button></div>
+<p class="sub" style="margin-top:8px">Se genera un PDF con la inspección, las fotos y espacio para firmas. Toque el primer botón, elija WhatsApp y luego el grupo.</p><p class="msg" id="msg"></p></div>
 
 <div class="card hist"><h2>Últimas inspecciones (este dispositivo)</h2><div id="hist"><span class="sub">Sin registros</span></div></div>
 </main>
+<script src="jspdf.umd.min.js"></script>
+<script src="pdf.js"></script>
 <script>
 var G=[
 ["Documentos",[["Licencia de conducción vigente y de la categoría",1],["SOAT vigente",1],["Revisión técnico-mecánica vigente",1],["Tarjeta de propiedad",0]]],
@@ -121,21 +118,27 @@ if($("obs").value)L.push("","Observaciones: "+$("obs").value);return L.join("\n"
 function upd(){var c=calc(),r=$("res");
 if(c.d<c.t){r.className="res pend";r.textContent="Faltan ítems por marcar ("+c.d+"/"+c.t+")"}
 else if(c.crit.length){r.className="res stop";r.textContent="NO APTO PARA SALIR: falla crítica"}
-else{r.className="res go";r.textContent=c.mal.length?"APTO CON NOVEDADES: reportar a mantenimiento":"APTO PARA INICIAR ACTIVIDADES"}
-var t=txt(c);$("rep").textContent=t;
-$("tg").href="https://t.me/share/url?url=%20&text="+encodeURIComponent(t);
-$("wa").href="https://wa.me/?text="+encodeURIComponent(t)}
+else{r.className="res go";r.textContent=c.mal.length?"APTO CON NOVEDADES: reportar a mantenimiento":"APTO PARA INICIAR ACTIVIDADES"}}
 function say(m){$("msg").textContent=m}
-$("copy").onclick=function(){var t=$("rep").textContent;try{navigator.clipboard.writeText(t).then(function(){say("Reporte copiado")},function(){say("No se pudo copiar")})}catch(e){say("No se pudo copiar")}};
-$("save").onclick=function(){var c=calc();if(c.d<c.t||!$("placa").value||!$("cond").value){say("Complete placa, conductor y todos los ítems");return}
-try{var a=JSON.parse(localStorage.getItem("insp")||"[]");a.unshift({f:$("fecha").value,p:$("placa").value.toUpperCase(),ok:!c.crit.length,t:txt(c)});localStorage.setItem("insp",JSON.stringify(a.slice(0,30)));say("Guardado");hist()}catch(e){say("No se pudo guardar en este equipo")}};
 function hist(){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");if(!a.length)return;
 $("hist").innerHTML=a.slice(0,10).map(function(x){return"<div><span>"+x.f+" · "+x.p+"</span><b style='color:var(--"+(x.ok?"ok":"ko")+")'>"+(x.ok?"Apto":"No apto")+"</b></div>"}).join("")}catch(e){}}
+function sv(c){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");a.unshift({f:$("fecha").value,p:$("placa").value.trim().toUpperCase(),ok:!c.crit.length});localStorage.setItem("insp",JSON.stringify(a.slice(0,30)));hist()}catch(e){}}
 var P=[];
-$("foto").addEventListener("change",function(e){var fs=Array.from(e.target.files).slice(0,3-P.length);fs.forEach(function(fl){shrink(fl,function(b){if(!b)return;P.push(new File([b],"falla"+(P.length+1)+".jpg",{type:"image/jpeg"}));pv()})});e.target.value=""});
-function shrink(fl,cb){var im=new Image(),u=URL.createObjectURL(fl);im.onload=function(){var s=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(cb,"image/jpeg",.7)};im.onerror=function(){cb(null)};im.src=u}
-function pv(){$("ph").innerHTML="";P.forEach(function(f,i){var m=document.createElement("img");m.src=URL.createObjectURL(f);m.onclick=function(){P.splice(i,1);pv()};$("ph").appendChild(m)});$("fn").textContent=P.length?P.length+" foto(s). Toque una para quitarla.":"Hasta 3 fotos. Repita para agregar otra."}
-$("wa").addEventListener("click",function(e){if(!P.length)return;var d={files:P,text:$("rep").textContent};if(navigator.canShare&&navigator.canShare(d)){e.preventDefault();navigator.share(d).catch(function(){say("Envío cancelado")})}else say("Este navegador no adjunta fotos solo: envíe el reporte y adjunte las fotos desde la galería")});
+$("foto").addEventListener("change",function(e){var fl=e.target.files[0];e.target.value="";if(!fl||P.length>=3)return;shrink(fl,function(o){if(o){P.push(o);pv()}})});
+function shrink(fl,cb){var im=new Image(),u=URL.createObjectURL(fl);im.onload=function(){var s=Math.min(1,1280/Math.max(im.width,im.height)),w=Math.round(im.width*s),h=Math.round(im.height*s),c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(u);cb({d:c.toDataURL("image/jpeg",.7),w:w,h:h})};im.onerror=function(){cb(null)};im.src=u}
+function pv(){$("ph").innerHTML="";P.forEach(function(p,i){var m=document.createElement("img");m.src=p.d;m.onclick=function(){P.splice(i,1);pv()};$("ph").appendChild(m)});$("fn").textContent=P.length?P.length+" foto(s). Toque una para quitarla.":"Hasta 3 fotos, que van dentro del PDF. Repita para agregar otra."}
+var ENTIDAD="IPS Municipal de Ipiales E.S.E.";
+function ok(){var c=calc();if(!$("placa").value.trim()||!$("cond").value.trim()){say("Escriba la placa y el nombre del conductor");return 0}if(c.d<c.t){say("Faltan "+(c.t-c.d)+" ítems por marcar");return 0}if(!window.jspdf||!window.buildPDF){say("No cargó el generador de PDF. Abra la app con internet y vuelva a intentar");return 0}return 1}
+function mk(){var c=calc(),fe=$("fecha").value,pl=$("placa").value.trim().toUpperCase();
+var doc=buildPDF({J:window.jspdf.jsPDF,G:G,S:S,c:c,P:P,entidad:ENTIDAD,f:{fecha:fe,placa:pl,cond:$("cond").value.trim(),tipo:$("tipo").value,km:$("km").value,ruta:$("ruta").value.trim(),obs:$("obs").value.trim()}});
+var nm="Inspeccion_"+(pl.replace(/[^A-Z0-9]/g,"")||"vehiculo")+"_"+fe.slice(0,10).replace(/-/g,"")+".pdf";
+var est=c.crit.length?"NO APTO PARA SALIR":(c.mal.length?"APTO CON NOVEDADES":"APTO");
+return{c:c,doc:doc,nm:nm,est:est,pl:pl,f:new File([doc.output("blob")],nm,{type:"application/pdf"})}}
+function dl(r){r.doc.save(r.nm);say("PDF descargado. Para enviarlo: WhatsApp, clip, Documento, y elija el archivo")}
+$("pdfdl").onclick=function(){if(!ok())return;var r=mk();sv(r.c);dl(r)};
+$("pdfsend").onclick=function(){if(!ok())return;var r=mk();sv(r.c);
+var sd={files:[r.f],title:"Inspección "+r.pl,text:"Inspección preoperacional "+r.pl+": "+r.est};
+if(navigator.canShare&&navigator.canShare(sd)){navigator.share(sd).catch(function(e){if(e&&e.name==="AbortError")return;dl(r)})}else dl(r)};
 hist();upd();
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 </script>
