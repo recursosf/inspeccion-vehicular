@@ -4,8 +4,10 @@ function T(s,px,py,o){d.text(String(s),px,py,o)}
 function nb(h){if(y+h>276){d.addPage();y=16}}
 function H(s){nb(12);d.setFont("helvetica","bold");d.setFontSize(10);d.setTextColor(GR[0],GR[1],GR[2]);T(s,M,y+4);y+=7}
 d.setFillColor(GR[0],GR[1],GR[2]);d.rect(0,0,W,26,"F");
-d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(14);T("INSPECCIÓN PREOPERACIONAL DE VEHÍCULOS",M,12);
-d.setFont("helvetica","normal");d.setFontSize(9);T(x.entidad,M,19);
+var tx=M;
+if(x.logo){d.setFillColor(255,255,255);d.roundedRect(M-2,2,32,22,2,2,"F");var ls=Math.min(28/x.logo.w,19/x.logo.h),lw=x.logo.w*ls,lh=x.logo.h*ls;d.addImage(x.logo.d,"PNG",M-2+(32-lw)/2,2+(22-lh)/2,lw,lh);tx=M+36}
+d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(14);T("INSPECCIÓN PREOPERACIONAL DE VEHÍCULOS",tx,12);
+d.setFont("helvetica","normal");d.setFontSize(9);T(x.entidad,tx,19);
 y=33;
 var rows=[["Fecha y hora",f.fecha,"Placa",f.placa],["Conductor",f.cond,"Tipo de vehículo",f.tipo],["Kilometraje",f.km||"-","Actividad / ruta",f.ruta||"-"]];
 rows.forEach(function(r){
