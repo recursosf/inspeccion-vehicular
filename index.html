@@ -44,6 +44,8 @@ pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg);border:1px solid v
 .msg{font-size:.85rem;color:var(--ac);min-height:1.2em;margin:6px 0}
 .ph{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ph img{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
 :root{--wr:#b86e00}
+.res.warn{background:#c2570c;color:#fff}
+.rs{font-weight:400;font-size:.85rem;margin-top:4px}
 .opts button{font-size:.88rem;padding:9px 2px}
 </style>
 </head>
@@ -82,8 +84,8 @@ pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg);border:1px solid v
 <div class="acts"><button class="sec" id="sigclr" style="grid-column:1/-1">Borrar firma</button></div></div>
 
 <div class="card"><h2>Enviar inspección</h2>
-<div class="acts"><button id="pdfsend" style="grid-column:1/-1">Enviar PDF por WhatsApp</button><button class="sec" id="pdfdl" style="grid-column:1/-1">Solo descargar PDF</button></div>
-<p class="sub" style="margin-top:8px">Se genera un PDF con la inspección, las fotos y espacio para firmas. Toque el primer botón, elija WhatsApp y luego el grupo.</p><p class="msg" id="msg"></p></div>
+<div class="acts"><button id="pdfsend" style="grid-column:1/-1">Enviar PDF por WhatsApp</button></div>
+<p class="sub" style="margin-top:8px">Toque el botón, elija WhatsApp y luego el grupo. El PDF no se descarga en el celular.</p><p class="msg" id="msg"></p></div>
 
 <div class="card hist"><h2>Últimas inspecciones (este dispositivo)</h2><div id="hist"><span class="sub">Sin registros</span></div></div>
 </main>
@@ -91,46 +93,47 @@ pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg);border:1px solid v
 <script src="pdf.js"></script>
 <script>
 var G=[
-["Documentos",[["Licencia de conducción vigente y de la categoría",1],["SOAT vigente",1],["Revisión técnico-mecánica vigente",1],["Tarjeta de propiedad",0]]],
-["Líquidos y combustible",[["Nivel de aceite de motor",0],["Nivel de refrigerante",0],["Nivel de líquido de frenos",1],["Líquido de dirección hidráulica",0],["Agua del limpiaparabrisas",0],["Combustible suficiente para la ruta",0]]],
-["Llantas y ruedas",[["Presión de aire correcta",0],["Labrado en buen estado, sin cortes ni deformaciones",1],["Llanta de repuesto en buen estado",0],["Tuercas completas y ajustadas",1]]],
-["Frenos, dirección y suspensión",[["Freno de servicio responde (pedal firme)",1],["Freno de parqueo sostiene el vehículo",1],["Dirección sin juego ni ruidos",1],["Suspensión sin ruidos ni fugas",0]]],
-["Luces, pito y señales",[["Luces bajas y altas",1],["Direccionales y estacionarias",0],["Luces de freno y reversa",1],["Pito funciona",1],["Alarma de reversa (si aplica)",0],["Ambulancia: sirena y luces de emergencia",0]]],
-["Visibilidad",[["Parabrisas sin fisuras que obstruyan",1],["Limpiabrisas en buen estado",0],["Espejos retrovisores completos y ajustados",1]]],
-["Seguridad del ocupante",[["Cinturones de seguridad funcionales",1],["Puertas y seguros operan bien",0],["Casco y chaleco (moto)",0]]],
-["Motor y tablero",[["Sin fugas de aceite, agua o combustible",0],["Batería con bornes firmes",0],["Correas y mangueras visibles en buen estado",0],["Tablero sin testigos de alarma encendidos",1]]],
-["Equipo de carretera y botiquín",[["Extintor vigente y cargado",1],["Botiquín completo",0],["Dos señales de carretera (triángulos)",0],["Gato y llave de cruz",0],["Tacos o cuñas y linterna",0]]],
-["Aseo y orden",[["Cabina limpia y sin objetos sueltos",0],["Carga o equipos bien asegurados",0]]]
+["Documentos",[["Licencia de conducción vigente y de la categoría",3,1],["SOAT vigente",3,1],["Revisión técnico-mecánica vigente",3,1],["Tarjeta de propiedad",2,1]]],
+["Líquidos y combustible",[["Nivel de aceite de motor",2],["Nivel de refrigerante",2],["Nivel de líquido de frenos",3],["Líquido de dirección hidráulica",2],["Agua del limpiaparabrisas",1],["Combustible suficiente para la ruta",1]]],
+["Llantas y ruedas",[["Presión de aire correcta",2],["Labrado en buen estado, sin cortes ni deformaciones",3],["Llanta de repuesto en buen estado",2],["Tuercas completas y ajustadas",3]]],
+["Frenos, dirección y suspensión",[["Freno de servicio responde (pedal firme)",3],["Freno de parqueo sostiene el vehículo",3],["Dirección sin juego ni ruidos",3],["Suspensión sin ruidos ni fugas",2]]],
+["Luces, pito y señales",[["Luces bajas y altas",3],["Direccionales y estacionarias",3],["Luces de freno y reversa",3],["Pito funciona",2],["Alarma de reversa (si aplica)",1],["Ambulancia: sirena y luces de emergencia",2]]],
+["Visibilidad",[["Parabrisas sin fisuras que obstruyan",3],["Limpiabrisas en buen estado",3],["Espejos retrovisores completos y ajustados",2]]],
+["Seguridad del ocupante",[["Cinturones de seguridad funcionales",3],["Puertas y seguros operan bien",3],["Casco y chaleco (moto)",2]]],
+["Motor y tablero",[["Sin fugas de aceite, agua o combustible",3],["Batería con bornes firmes",2],["Correas y mangueras visibles en buen estado",2],["Tablero sin testigos de alarma encendidos",2]]],
+["Equipo de carretera y botiquín",[["Extintor vigente y cargado",2],["Botiquín completo",2],["Dos señales de carretera (triángulos)",2],["Gato y llave de cruz",2],["Tacos o cuñas y linterna",1]]],
+["Aseo y orden",[["Cabina limpia y sin objetos sueltos",1],["Carga o equipos bien asegurados",3]]]
 ];
 var S={},$=function(i){return document.getElementById(i)};
 var f=new Date();function pad(n){return String(n).padStart(2,"0")}
 $("fecha").value=f.getFullYear()+"-"+pad(f.getMonth()+1)+"-"+pad(f.getDate())+" "+pad(f.getHours())+":"+pad(f.getMinutes());
 var h="";
 G.forEach(function(g,gi){h+='<div class="card"><h2>'+(gi+1)+". "+g[0]+"</h2>";
-g[1].forEach(function(it,ii){var k=gi+"_"+ii;h+='<div class="it"><div class="n">'+it[0]+'</div><div class="opts" data-k="'+k+'"><button data-v="b">Bien</button><button data-v="r">Regular</button><button data-v="m">Mal</button><button data-v="n">N/A</button></div></div>'});
+g[1].forEach(function(it,ii){var k=gi+"_"+ii;h+='<div class="it"><div class="n">'+it[0]+'</div><div class="opts" data-k="'+k+'"><button data-v="b">Bien</button>'+(it[2]?"":'<button data-v="r">Regular</button>')+'<button data-v="m">Mal</button><button data-v="n">N/A</button></div></div>'});
 h+="</div>"});
 $("lista").innerHTML=h;
 document.addEventListener("click",function(e){var b=e.target.closest(".opts button");if(!b)return;var k=b.parentNode.dataset.k;S[k]=b.dataset.v;
 b.parentNode.querySelectorAll("button").forEach(function(x){x.className=x===b?"s-"+x.dataset.v:""});upd()});
 ["placa","cond","tipo","km","ruta","obs"].forEach(function(i){$(i).addEventListener("input",upd)});
-function calc(){var t=0,d=0,mal=[],crit=[],reg=[];
-G.forEach(function(g,gi){g[1].forEach(function(it,ii){t++;var v=S[gi+"_"+ii];if(v)d++;if(v==="r")reg.push(it[0]);if(v==="m"){mal.push(it[0]);if(it[1])crit.push(it[0])}})});
-return{t:t,d:d,mal:mal,crit:crit,reg:reg}}
-function txt(c){var L=["INSPECCIÓN PREOPERACIONAL","Fecha: "+$("fecha").value,"Placa: "+($("placa").value.toUpperCase()||"—"),"Conductor: "+($("cond").value||"—"),"Vehículo: "+$("tipo").value+" | Km: "+($("km").value||"—"),"Actividad: "+($("ruta").value||"—"),""];
-var est=c.d<c.t?"INCOMPLETA ("+c.d+"/"+c.t+")":c.crit.length?"NO APTO PARA SALIR":c.mal.length?"APTO CON NOVEDADES":"APTO";
-L.push("RESULTADO: "+est);
-if(c.crit.length){L.push("Fallas críticas:");c.crit.forEach(function(x){L.push("- "+x)})}
-var o=c.mal.filter(function(x){return c.crit.indexOf(x)<0});
-if(o.length){L.push("Otras novedades:");o.forEach(function(x){L.push("- "+x)})}
-if($("obs").value)L.push("","Observaciones: "+$("obs").value);return L.join("\n")}
+function calc(){var t=0,d=0,L=[],lv=0;
+G.forEach(function(g,gi){g[1].forEach(function(it,ii){t++;var v=S[gi+"_"+ii];if(v)d++;
+var l=v==="m"?it[1]:(v==="r"?Math.max(1,it[1]-1):0);
+if(l){L.push({n:it[0],l:l,v:v});if(l>lv)lv=l}})});
+L.sort(function(a,b){return b.l-a.l});
+return{t:t,d:d,lv:lv,items:L}}
+var RS=[
+{c:"go",t:"APTO PARA INICIAR ACTIVIDADES",s:"Sin fallas reportadas.",e:"APTO"},
+{c:"go",t:"NIVEL 1 · LEVE: SALIDA AUTORIZADA",s:"Reportar las novedades a mantenimiento.",e:"NIVEL 1 LEVE: SALIDA AUTORIZADA"},
+{c:"warn",t:"NIVEL 2 · MAYOR: SALIDA CONDICIONADA",s:"No salir hasta que mantenimiento o una persona competente evalúe y autorice.",e:"NIVEL 2 MAYOR: SALIDA CONDICIONADA"},
+{c:"stop",t:"NIVEL 3 · CRÍTICA: SALIDA PROHIBIDA",s:"Vehículo inmovilizado preventivamente. Solo sale después de corregir y verificar.",e:"NIVEL 3 CRITICA: SALIDA PROHIBIDA"}];
 function upd(){var c=calc(),r=$("res");
-if(c.d<c.t){r.className="res pend";r.textContent="Faltan ítems por marcar ("+c.d+"/"+c.t+")"}
-else if(c.crit.length){r.className="res stop";r.textContent="NO APTO PARA SALIR: falla crítica"}
-else{r.className="res go";r.textContent=(c.mal.length||c.reg.length)?"APTO CON NOVEDADES: reportar a mantenimiento":"APTO PARA INICIAR ACTIVIDADES"}}
+if(c.d<c.t){r.className="res pend";r.textContent="Faltan ítems por marcar ("+c.d+"/"+c.t+")";return}
+var q=RS[c.lv],top=c.items.filter(function(i){return i.l===c.lv}).map(function(i){return i.n});
+r.className="res "+q.c;r.innerHTML="<div>"+q.t+"</div><div class='rs'>"+q.s+(top.length?"<br>"+top.join("; "):"")+"</div>"}
 function say(m){$("msg").textContent=m}
-function hist(){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");if(!a.length)return;
-$("hist").innerHTML=a.slice(0,10).map(function(x){return"<div><span>"+x.f+" · "+x.p+"</span><b style='color:var(--"+(x.ok?"ok":"ko")+")'>"+(x.ok?"Apto":"No apto")+"</b></div>"}).join("")}catch(e){}}
-function sv(c){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");a.unshift({f:$("fecha").value,p:$("placa").value.trim().toUpperCase(),ok:!c.crit.length});localStorage.setItem("insp",JSON.stringify(a.slice(0,30)));hist()}catch(e){}}
+function hist(){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");if(!a.length)return;var N=["Apto","Nivel 1 Leve","Nivel 2 Condicionada","Nivel 3 Prohibida"],C=["ok","ok","wr","ko"];
+$("hist").innerHTML=a.slice(0,10).map(function(x){var l=x.lv!==undefined?x.lv:(x.ok?0:3);return"<div><span>"+x.f+" · "+x.p+"</span><b style='color:var(--"+C[l]+")'>"+N[l]+"</b></div>"}).join("")}catch(e){}}
+function sv(c){try{var a=JSON.parse(localStorage.getItem("insp")||"[]");a.unshift({f:$("fecha").value,p:$("placa").value.trim().toUpperCase(),lv:c.lv});localStorage.setItem("insp",JSON.stringify(a.slice(0,30)));hist()}catch(e){}}
 var P=[];
 $("foto").addEventListener("change",function(e){var fl=e.target.files[0];e.target.value="";if(!fl||P.length>=3)return;shrink(fl,function(o){if(o){P.push(o);pv()}})});
 function shrink(fl,cb){var im=new Image(),u=URL.createObjectURL(fl);im.onload=function(){var s=Math.min(1,1280/Math.max(im.width,im.height)),w=Math.round(im.width*s),h=Math.round(im.height*s),c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(u);cb({d:c.toDataURL("image/jpeg",.7),w:w,h:h})};im.onerror=function(){cb(null)};im.src=u}
@@ -149,13 +152,12 @@ function ok(){var c=calc();if(!$("placa").value.trim()||!$("cond").value.trim())
 function mk(){var c=calc(),fe=$("fecha").value,pl=$("placa").value.trim().toUpperCase();
 var doc=buildPDF({J:window.jspdf.jsPDF,G:G,S:S,c:c,P:P,logo:LG,sig:sg.toDataURL("image/jpeg",.85),entidad:ENTIDAD,f:{fecha:fe,placa:pl,cond:$("cond").value.trim(),tipo:$("tipo").value,km:$("km").value,ruta:$("ruta").value.trim(),obs:$("obs").value.trim()}});
 var nm="Inspeccion_"+(pl.replace(/[^A-Z0-9]/g,"")||"vehiculo")+"_"+fe.slice(0,10).replace(/-/g,"")+".pdf";
-var est=c.crit.length?"NO APTO PARA SALIR":((c.mal.length||c.reg.length)?"APTO CON NOVEDADES":"APTO");
+var est=RS[c.lv].e;
 return{c:c,doc:doc,nm:nm,est:est,pl:pl,f:new File([doc.output("blob")],nm,{type:"application/pdf"})}}
-function dl(r){r.doc.save(r.nm);say("PDF descargado. Para enviarlo: WhatsApp, clip, Documento, y elija el archivo")}
-$("pdfdl").onclick=function(){if(!ok())return;var r=mk();sv(r.c);dl(r)};
-$("pdfsend").onclick=function(){if(!ok())return;var r=mk();sv(r.c);
-var sd={files:[r.f],title:"Inspección "+r.pl,text:"Inspección preoperacional "+r.pl+": "+r.est};
-if(navigator.canShare&&navigator.canShare(sd)){navigator.share(sd).catch(function(e){if(e&&e.name==="AbortError")return;dl(r)})}else dl(r)};
+$("pdfsend").onclick=function(){if(!ok())return;var r=mk();
+var sd={files:[r.f],title:"Inspección "+r.pl,text:"Inspección del vehículo "+r.pl+": "+r.est};
+if(navigator.canShare&&navigator.canShare(sd)){navigator.share(sd).then(function(){sv(r.c);say("Inspección enviada")}).catch(function(e){if(e&&e.name==="AbortError")return;say("No se pudo compartir. Intente de nuevo")})}
+else say("Este celular o navegador no permite compartir el PDF. Use Chrome (Android) o Safari (iPhone) actualizados.")};
 hist();upd();
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 </script>
