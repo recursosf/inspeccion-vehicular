@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#002ac6">
+<title>Administración de inspecciones</title>
+<style>
+:root{box-sizing:border-box;--bg:#f4f6f8;--card:#fff;--tx:#17212b;--mu:#5b6b7a;--bd:#d5dde5;--ac:#002ac6}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0f1519;--card:#18222a;--tx:#e8eef3;--mu:#98a7b5;--bd:#2c3b47;--ac:#5a72ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:14px}
+h1{font-size:1.05rem;margin:0}
+.hd{display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--ac);padding-bottom:8px;margin-bottom:12px}
+.hd img{height:52px;width:auto;background:#fff;border-radius:8px;padding:3px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:0 0 12px}
+.card h2{font-size:1rem;margin:0 0 8px;color:var(--ac)}
+label{display:block;font-size:.8rem;color:var(--mu);margin:6px 0 2px}
+input{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+button{padding:10px 14px;border-radius:10px;border:0;background:var(--ac);color:#fff;font:inherit;font-weight:600}
+button.sec{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+button:disabled{opacity:.6}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bd)}
+.row:first-child{border-top:0}
+.sub{color:var(--mu);font-size:.85rem}
+.msg{font-size:.9rem;color:var(--ac);min-height:1.2em;margin:8px 0 0}
+.bar{display:flex;gap:8px}
+.bar input{flex:1}
+</style>
+</head>
+<body>
+<main>
+<div class="hd"><img src="logo.png" alt="IPS Municipal de Ipiales"><h1>ADMINISTRACIÓN DE INSPECCIONES</h1></div>
+
+<div class="card" id="login">
+<h2>Acceso</h2>
+<label for="ac">Código de administrador</label>
+<input id="ac" type="password" autocomplete="off">
+<div style="margin-top:10px"><button id="go">Entrar</button></div>
+<p class="msg" id="m"></p>
+</div>
+
+<div id="app" style="display:none">
+<div class="card"><div class="bar"><input id="q" placeholder="Buscar por placa o conductor"><button class="sec" id="rf">Actualizar</button></div></div>
+<div class="card" id="lst"></div>
+</div>
+</main>
+
+<script src="config.js"></script>
+<script src="jspdf.umd.min.js"></script>
+<script src="pdf.js"></script>
+<script>
+var $=function(i){return document.getElementById(i)},AC="",FILAS=[],LG=null;
+(function(){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);LG={d:c.toDataURL("image/png"),w:c.width,h:c.height}}catch(e){}};im.src="logo.png"})();
+var ER={codigo:"Código incorrecto",sin_configurar:"El registro aún no tiene los códigos configurados",noexiste:"No se encontró la inspección"};
+var NV=["Apto","Nivel 1 Leve","Nivel 2 Mayor","Nivel 3 Crítica"],CL=["#0b6e4f","#0b6e4f","#c2570c","#c0392b"];
+function msg(t){$("m").textContent=t}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function post(p){return fetch(URL_ENVIO,{method:"POST",body:JSON.stringify(p)}).then(function(r){return r.json()})}
+function pintar(){var q=$("q").value.toLowerCase(),h="";
+FILAS.filter(function(f){return!q||(f.placa+" "+f.cond).toLowerCase().indexOf(q)>=0}).forEach(function(f){
+var lv=Number(f.lv)||0;
+h+='<div class="row"><div><b>'+esc(f.placa)+'</b> · '+esc(f.cond)+'<br><span class="sub">'+esc(f.fecha)+' · '+esc(f.tipo)+'</span><br><b style="color:'+CL[lv]+'">'+NV[lv]+'</b></div><button data-id="'+esc(f.id)+'">PDF</button></div>'});
+$("lst").innerHTML=h||'<p class="sub">Sin registros</p>'}
+function cargar(){msg("Cargando...");
+post({action:"listar",codigo:AC}).then(function(r){
+if(!r||!r.ok){msg(ER[r&&r.error]||"No se pudo cargar el registro");return}
+FILAS=r.filas;$("login").style.display="none";$("app").style.display="block";pintar()
+},function(){msg("Sin conexión, o la dirección del registro no está bien configurada en config.js")})}
+$("go").onclick=function(){AC=$("ac").value;
+if(typeof URL_ENVIO==="undefined"||!URL_ENVIO){msg("Falta configurar la dirección del registro en config.js");return}
+if(!AC){msg("Escriba el código");return}cargar()};
+$("ac").addEventListener("keydown",function(e){if(e.key==="Enter")$("go").click()});
+$("rf").onclick=function(){post({action:"listar",codigo:AC}).then(function(r){if(r&&r.ok){FILAS=r.filas;pintar()}})};
+$("q").addEventListener("input",pintar);
+$("lst").addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.dataset.id)pdf(b.dataset.id,b)});
+function pdf(id,b){b.disabled=true;b.textContent="...";
+post({action:"ver",codigo:AC,id:id}).then(function(r){
+if(!r||!r.ok){alert(ER[r&&r.error]||"No se pudo cargar la inspección");return}
+var G=r.g.map(function(g){return[g[0],g[1].map(function(it){return[it[0],it[1],it[2]]})]}),S={},t=0,d=0;
+r.g.forEach(function(g,gi){g[1].forEach(function(it,ii){t++;if(it[3]){S[gi+"_"+ii]=it[3];d++}})});
+var doc=buildPDF({J:window.jspdf.jsPDF,G:G,S:S,c:{lv:r.lv,items:r.items,t:t,d:d},P:r.fotos,sig:r.firma,logo:LG,entidad:ENTIDAD,f:r.f});
+doc.save("Inspeccion_"+String(r.f.placa).replace(/[^A-Za-z0-9]/g,"")+"_"+String(r.f.fecha).slice(0,10).replace(/-/g,"")+".pdf")
+}).catch(function(){alert("No se pudo generar el PDF. Revise la conexión e intente de nuevo.")}).then(function(){b.disabled=false;b.textContent="PDF"})}
+</script>
+</body>
+</html>
